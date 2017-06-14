@@ -53,7 +53,7 @@ module.exports = function (options) {
     }
 
     if (file.data) {
-      data = _.merge(file.data, data);
+      data = _.merge({}, file.data, data);
     }
 
     if (file.isStream()) {
@@ -62,14 +62,14 @@ module.exports = function (options) {
     }
 
     var frontmatter = fm(file.contents.toString());
-    if(!_.isEmpty(frontmatter.attributes)) {
+    if(!_.isEmpty(frontmatter.attributes) || _.has(data, 'page.layout')) {
 
         if(isMarkdown(file)) {
             md.setOptions(options.marked);
             frontmatter.body = md(frontmatter.body);
         }
 
-        _.merge(data, { page: frontmatter.attributes } );
+        data = _.merge({}, data, { page: frontmatter.attributes } );
 
         if(data.page.layout){
           file.contents = Buffer.from('\{% extends \"' + data.page.layout + '.njk\" %\}\n\{% block ' +  options.block + ' %\}' + frontmatter.body + '\n\{% endblock %\}');
